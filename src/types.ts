@@ -27,3 +27,7 @@ export interface Loan {
   reason: string;
   status: LoanStatus;
 }
+
+export interface LoginState {
+  error?: string;
+}

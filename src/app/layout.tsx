@@ -1,7 +1,8 @@
 const BUILD_TAG = "rb-6129";
 
 import type { Metadata } from "next";
-import Link from "next/link";
+import { Header } from "@/components/Header";
+import { Providers } from "./providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -18,13 +19,10 @@ export default function RootLayout({
   return (
     <html lang="vi">
       <body data-build-tag={BUILD_TAG}>
-        <header className="site-header">
-          <nav className="site-nav" aria-label="Menu chính">
-            <Link href="/">Trang chủ</Link>
-            <Link href="/books">Sách</Link>
-          </nav>
-        </header>
-        <main className="container">{children}</main>
+        <Providers>
+          <Header />
+          <main className="container">{children}</main>
+        </Providers>
       </body>
     </html>
   );
