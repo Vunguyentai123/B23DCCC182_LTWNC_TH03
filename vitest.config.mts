@@ -15,6 +15,7 @@ export default defineConfig({
         'src/lib/format.ts',
         'src/components/LoanForm.tsx',
       ],
+      reporter: [['text', { skipFull: false }], 'json-summary', 'html'],
     },
   },
 });
