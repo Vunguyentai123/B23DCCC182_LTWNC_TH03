@@ -1,6 +1,7 @@
 'use client';
 
 import { useActionState } from 'react';
+import { Send } from 'lucide-react';
 import { TERMS } from '@/data/books';
 import { TERM_LABEL } from '@/lib/format';
 import type { LoanFormState } from '@/lib/loan-validate';
@@ -28,7 +29,7 @@ export function LoanForm({ books, defaultBookId, action }: LoanFormProps) {
   const formKey = `${JSON.stringify(values)}|${state.ok ? 'ok' : ''}|${state.message ?? ''}`;
 
   return (
-    <form action={formAction} className="stack" key={formKey}>
+    <form action={formAction} className="stack form-grid" key={formKey}>
       <div className="field">
         <label htmlFor="bookId">Sách</label>
         <select id="bookId" name="bookId" defaultValue={selectedBookId}>
@@ -82,7 +83,7 @@ export function LoanForm({ books, defaultBookId, action }: LoanFormProps) {
         ) : null}
       </div>
 
-      <div className="field">
+      <div className="field field-full">
         <label htmlFor="reason">Lý do mượn</label>
         <textarea
           id="reason"
@@ -93,6 +94,7 @@ export function LoanForm({ books, defaultBookId, action }: LoanFormProps) {
       </div>
 
       <button type="submit" disabled={pending}>
+        <Send size={17} aria-hidden="true" />
         Gửi yêu cầu
       </button>
 

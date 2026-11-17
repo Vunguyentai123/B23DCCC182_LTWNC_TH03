@@ -12,7 +12,10 @@ export function SessionRefresher() {
   const pathname = usePathname();
   const { update } = useSession();
   const updateRef = useRef(update);
-  updateRef.current = update;
+
+  useEffect(() => {
+    updateRef.current = update;
+  }, [update]);
 
   useEffect(() => {
     void updateRef.current();

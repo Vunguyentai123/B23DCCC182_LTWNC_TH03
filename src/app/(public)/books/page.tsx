@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { CATEGORIES } from '@/data/books';
+import { SearchX } from 'lucide-react';
+import { BooksFilter } from '@/components/BooksFilter';
 import { loadBooksShift } from '@/lib/books';
 
 export const dynamic = 'force-dynamic';
@@ -29,60 +30,60 @@ export default async function BooksPage({ searchParams }: BooksPageProps) {
 
   return (
     <section>
-      <h1>Danh mục sách</h1>
+      <header className="page-head">
+        <p className="eyebrow">Kho sách</p>
+        <h1>Danh mục sách</h1>
+        <p className="page-subtitle">
+          Tìm nhanh theo tên sách hoặc chọn một chuyên mục bên dưới.
+        </p>
+      </header>
 
-      <form className="filters" method="get" action="/books" autoComplete="off">
-        <div className="field">
-          <label htmlFor="q">Tìm sách</label>
-          <input
-            id="q"
-            name="q"
-            type="search"
-            defaultValue={q}
-            autoComplete="off"
-            spellCheck={false}
-          />
-        </div>
-        <div className="field">
-          <label htmlFor="category">Chuyên mục</label>
-          <select id="category" name="category" defaultValue={category}>
-            <option value="">Tất cả</option>
-            {CATEGORIES.map((item) => (
-              <option key={item} value={item}>
-                {item}
-              </option>
-            ))}
-          </select>
-        </div>
-        <button type="submit">Lọc</button>
-      </form>
+      <div className="panel filter-panel">
+        <BooksFilter initialQ={q} initialCategory={category} />
+      </div>
 
-      <p>Tìm thấy {books.length} sách</p>
-      <p>Render lúc: {renderTime()}</p>
+      <div className="results-meta">
+        <p className="result-count">Tìm thấy {books.length} sách</p>
+        <p className="render-time">Render lúc: {renderTime()}</p>
+      </div>
 
       {books.length === 0 ? (
-        <p className="notice">Không tìm thấy sách nào</p>
+        <div className="empty-state">
+          <span className="empty-icon">
+            <SearchX size={28} aria-hidden="true" />
+          </span>
+          <p>Không tìm thấy sách nào</p>
+          <p className="muted">
+            Thử từ khóa khác hoặc bỏ chọn chuyên mục để xem toàn bộ danh mục.
+          </p>
+        </div>
       ) : (
-        <table>
-          <thead>
-            <tr>
-              <th>Tên sách</th>
-              <th>Tác giả</th>
-              <th>Số bản</th>
-            </tr>
-          </thead>
-          <tbody>
-            {books.map((book) => (
-              <tr key={book.id}>
-                <td>
-                  <Link href={`/books/${book.id}`}>{book.title}</Link>
-                </td>
-                <td>{book.author}</td>
-                <td>Số bản: {book.copies}</td>
+        <div className="table-wrap">
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Tên sách</th>
+                <th>Tác giả</th>
+                <th>Số bản</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {books.map((book) => (
+                <tr key={book.id}>
+                  <td>
+                    <Link className="book-link" href={`/books/${book.id}`}>
+                      {book.title}
+                    </Link>
+                  </td>
+                  <td className="muted">{book.author}</td>
+                  <td>
+                    <span className="copy-badge">Số bản: {book.copies}</span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </section>
   );

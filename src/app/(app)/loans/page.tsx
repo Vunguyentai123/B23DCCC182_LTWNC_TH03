@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { Inbox } from 'lucide-react';
 import { auth } from '@/auth';
 import { LoanForm } from '@/components/LoanForm';
+import { LoansTable } from '@/components/LoansTable';
 import { loadBooksShift } from '@/lib/books';
-import { formatDate, STATUS_LABEL, TERM_LABEL } from '@/lib/format';
 import { listLoans, parseStatus } from '@/lib/loans';
 import { can } from '@/lib/permissions';
 import { reviewLoan } from '../admin/actions';
@@ -57,114 +58,104 @@ export default async function LoansPage({ searchParams }: LoansPageProps) {
 
   return (
     <section>
-      <h1>Sách đã mượn</h1>
+      <header className="page-head">
+        <p className="eyebrow">Tủ sách của bạn</p>
+        <h1>Sách đã mượn</h1>
+        <p className="page-subtitle">
+          Theo dõi trạng thái yêu cầu mượn và gửi yêu cầu mới.
+        </p>
+      </header>
 
       <p className="user-greeting">
+        <span className="user-greeting-dot" aria-hidden="true" />
         Xin chào, <strong>{session.user.name ?? email}</strong> ({role})
       </p>
 
       {canReview ? (
-        <p className="notice">
+        <p className="alert alert-info">
           Bạn là quản trị viên: có thể duyệt ngay trong bảng bên dưới hoặc mở{' '}
           <Link href="/admin">trang Quản trị</Link>.
         </p>
       ) : null}
 
-      <form className="filters" method="get" action="/loans">
-        <div className="field">
-          <label htmlFor="status">Trạng thái</label>
-          <select id="status" name="status" defaultValue={status}>
-            <option value="">Tất cả</option>
-            <option value="pending">Chờ duyệt</option>
-            <option value="approved">Đã duyệt</option>
-            <option value="rejected">Từ chối</option>
-          </select>
-        </div>
-        <button type="submit">Lọc</button>
-      </form>
+      <div className="panel filter-panel">
+        <form className="filters" method="get" action="/loans">
+          <div className="field">
+            <label htmlFor="status">Trạng thái</label>
+            <select id="status" name="status" defaultValue={status}>
+              <option value="">Tất cả</option>
+              <option value="pending">Chờ duyệt</option>
+              <option value="approved">Đã duyệt</option>
+              <option value="rejected">Từ chối</option>
+            </select>
+          </div>
+          <button type="submit">Lọc</button>
+        </form>
+      </div>
 
-      {result.total === 0 ? (
-        <p className="notice">Chưa có yêu cầu mượn nào</p>
-      ) : (
-        <table>
-          <thead>
-            <tr>
-              <th>Tên sách</th>
-              <th>Ngày lấy</th>
-              <th>Thời hạn</th>
-              <th>Số quyển</th>
-              <th>Trạng thái</th>
-              <th>Hành động</th>
-            </tr>
-          </thead>
-          <tbody>
-            {result.items.map((loan) => {
-              const canCancel =
-                can(role, 'loan:create') &&
-                loan.userEmail === email &&
-                loan.status === 'pending';
+      <div className="results-meta">
+        <p className="result-count">{result.total} yêu cầu</p>
+        <p className="render-time">
+          Hiển thị {result.items.length} / {result.total}
+        </p>
+      </div>
 
-              return (
-                <tr key={loan.id}>
-                  <td>{loan.bookTitle}</td>
-                  <td>{formatDate(loan.pickupDate)}</td>
-                  <td>{TERM_LABEL[loan.term]}</td>
-                  <td>{loan.quantity} quyển</td>
-                  <td>{STATUS_LABEL[loan.status]}</td>
-                  <td>
-                    {canReview && loan.status === 'pending' ? (
-                      <div className="row-actions">
-                        <form action={reviewLoan.bind(null, loan.id, 'approved')}>
-                          <button type="submit">Duyệt</button>
-                        </form>
-                        <form action={reviewLoan.bind(null, loan.id, 'rejected')}>
-                          <button type="submit" className="secondary">
-                            Từ chối
-                          </button>
-                        </form>
-                      </div>
-                    ) : canCancel ? (
-                      <form action={cancelLoanAction.bind(null, loan.id)}>
-                        <button type="submit" className="secondary">
-                          Hủy
-                        </button>
-                      </form>
-                    ) : (
-                      <span className="muted">—</span>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      )}
+      <div className="panel table-panel">
+        {result.total === 0 ? (
+          <div className="empty-state">
+            <span className="empty-icon">
+              <Inbox size={28} aria-hidden="true" />
+            </span>
+            <p>Chưa có yêu cầu mượn nào</p>
+            <p className="muted">
+              Các yêu cầu bạn gửi sẽ xuất hiện tại đây để theo dõi trạng thái.
+            </p>
+          </div>
+        ) : (
+          <LoansTable
+            loans={result.items}
+            email={email}
+            canCreate={can(role, 'loan:create')}
+            canReview={canReview}
+            cancelAction={cancelLoanAction}
+            reviewAction={reviewLoan}
+          />
+        )}
+      </div>
 
       <div className="pagination">
         {result.page > 1 ? (
           <Link href={pageHref(result.page - 1)}>Trước</Link>
         ) : (
-          <span>Trước</span>
+          <span className="page-disabled">Trước</span>
         )}
-        <span>
+        <span className="page-status">
           Trang {result.page}/{result.totalPages}
         </span>
         {result.page < result.totalPages ? (
           <Link href={pageHref(result.page + 1)}>Sau</Link>
         ) : (
-          <span>Sau</span>
+          <span className="page-disabled">Sau</span>
         )}
       </div>
 
       {can(role, 'loan:create') ? (
-        <>
-          <h2>Gửi yêu cầu mượn</h2>
+        <section className="panel form-panel">
+          <div className="panel-head">
+            <div>
+              <p className="eyebrow">Gửi yêu cầu</p>
+              <h2>Gửi yêu cầu mượn</h2>
+            </div>
+            <p className="muted">
+              Chọn sách, ngày lấy và thời hạn mượn phù hợp.
+            </p>
+          </div>
           <LoanForm
             books={books}
             defaultBookId={defaultBookId}
             action={createLoanAction}
           />
-        </>
+        </section>
       ) : null}
     </section>
   );

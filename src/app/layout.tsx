@@ -6,6 +6,7 @@ import { Providers } from "./providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("http://localhost:3000"),
   title: {
     default: "Thư viện khoa CNTT",
     template: "%s | Thư viện khoa",
@@ -22,6 +23,10 @@ export default function RootLayout({
         <Providers>
           <Header />
           <main className="container">{children}</main>
+          <footer className="site-footer">
+            <span>Thư viện khoa CNTT PTIT</span>
+            <span>Lập trình web nâng cao · TH03</span>
+          </footer>
         </Providers>
       </body>
     </html>

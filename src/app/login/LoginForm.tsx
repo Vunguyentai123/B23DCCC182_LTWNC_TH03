@@ -1,6 +1,7 @@
 'use client';
 
 import { useActionState } from 'react';
+import { LogIn } from 'lucide-react';
 import type { LoginState } from '@/types';
 import { loginAction } from './actions';
 
@@ -10,7 +11,7 @@ export function LoginForm({ callbackUrl }: { callbackUrl: string }) {
   const [state, formAction, pending] = useActionState(loginAction, initialState);
 
   return (
-    <form action={formAction} className="stack">
+    <form action={formAction} className="stack auth-form">
       <input type="hidden" name="callbackUrl" value={callbackUrl} />
 
       <div className="field">
@@ -29,9 +30,14 @@ export function LoginForm({ callbackUrl }: { callbackUrl: string }) {
         />
       </div>
 
-      {state.error ? <p role="alert">{state.error}</p> : null}
+      {state.error ? (
+        <p className="alert alert-error" role="alert">
+          {state.error}
+        </p>
+      ) : null}
 
       <button type="submit" disabled={pending}>
+        <LogIn size={17} aria-hidden="true" />
         Đăng nhập
       </button>
     </form>

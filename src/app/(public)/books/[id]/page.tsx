@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { ArrowLeft, BookOpen, BookPlus } from 'lucide-react';
 import { loadBookById, loadBooksShift } from '@/lib/books';
 
 export const revalidate = 60;
@@ -44,16 +45,56 @@ export default async function BookDetailPage({ params }: BookDetailPageProps) {
     notFound();
   }
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Book',
+    name: book.title,
+    author: { '@type': 'Person', name: book.author },
+    genre: book.category,
+    inLanguage: 'vi',
+    url: `http://localhost:3000/books/${book.id}`,
+    publisher: {
+      '@type': 'Organization',
+      name: 'Thư viện khoa CNTT PTIT',
+    },
+  };
+
   return (
-    <article className="card">
-      <h1>{book.title}</h1>
-      <p>Tác giả: {book.author}</p>
-      <p>Chuyên mục: {book.category}</p>
-      <p>Số bản: {book.copies}</p>
-      <p>Cập nhật lúc: {updatedTime()}</p>
-      <p>
-        <Link href={`/loans?book=${book.id}`}>Mượn sách này</Link>
-      </p>
+    <article className="detail-card">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
+      <div className="book-cover" aria-hidden="true">
+        <BookOpen className="book-cover-icon" size={56} strokeWidth={1.2} />
+        <span className="book-cover-kicker">Thư viện CNTT</span>
+        <strong className="book-cover-title">{book.title}</strong>
+        <span className="book-cover-category">{book.category}</span>
+      </div>
+
+      <div className="detail-body">
+        <p className="eyebrow">{book.category}</p>
+        <h1>{book.title}</h1>
+        <p className="detail-author">Tác giả: {book.author}</p>
+
+        <div className="detail-meta">
+          <p>Chuyên mục: {book.category}</p>
+          <p>Số bản: {book.copies}</p>
+          <p className="muted">Cập nhật lúc: {updatedTime()}</p>
+        </div>
+
+        <div className="detail-actions">
+          <Link href={`/loans?book=${book.id}`} className="btn btn-primary">
+            <BookPlus size={18} aria-hidden="true" />
+            Mượn sách này
+          </Link>
+          <Link href="/books" className="btn btn-ghost">
+            <ArrowLeft size={16} aria-hidden="true" />
+            Danh mục sách
+          </Link>
+        </div>
+      </div>
     </article>
   );
 }
